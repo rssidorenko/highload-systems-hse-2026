@@ -104,4 +104,11 @@
 2. [Как мы упростили жизнь высоконагруженным сервисам с Platform V SessionsData. Часть 1](https://habr.com/ru/companies/sberbank/articles/728612/)
 3. [Названо число людей, пользующихся сервисом "Сбербанк Онлайн"](https://1prime.ru/20241009/sber-852085462.html)
 4. [Россияне третий месяц подряд берут меньше потребительских кредитов](https://finance.mail.ru/article/rossiyane-tretij-mesyac-podryad-berut-menshe-potrebitelskih-kreditov-69198027/)
-5. 
+5. [ЦБ: объем средств россиян в банках впервые в истории достиг ₽67 трлн](https://www.rbc.ru/quote/news/article/6981a4ac9a79478ac3d08747)
+6. [Сбер: крупнейший банк с лидирующими позициями в рознице](https://bcs-express.ru/novosti-i-analitika/sber-krupneishii-bank-s-lidiruiushchimi-pozitsiiami-v-roznitse)
+7. [В сутки через СБП проходит в среднем 50 млн операций](https://cbr.ru/press/event/?id=28045)
+8. [Доля Сбера в объеме всех переводов по Системе быстрых платежей достигла 75%](https://tass.ru/ekonomika/18036457)
+9. [В России в I квартале число платежей через QR-коды и биометрию выросло вдвое](https://www.interfax.ru/business/1030553)
+10. [В Сбере 70% обращений клиентов обрабатываются чат-ботом](https://www.gazeta.ru/social/news/2023/03/03/19878427.shtml)
+11. [Как Сбербанк Онлайн готовится к пиковым нагрузкам](https://habr.com/ru/companies/sberbank/articles/796243/)
+12. [Население России](https://ru.wikipedia.org/wiki/Население_России)
