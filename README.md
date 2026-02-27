@@ -142,7 +142,7 @@
 |Сибирский|Новосибирск|16 492 894	чел.|11,29%|
 |Дальневосточный|Владивосток|7 860 278 чел.|5,38%|
 
-### Расстояние между центрами ФО [[12]](https://banderlogika.ru/)
+### Расстояние между центрами ФО [[12]](https://banderlogika.ru/)[[13]](https://yandex.ru/maps)
 |Город|Москва|Санкт-Петербург|Ростов-на-Дону|Пятигорск|Нижний Новгород|Екатеринбург|Новосибирск|Владивосток|
 |----------|----------|----------|----------|----------|----------|----------|----------|----------|
 |Москва|-|636|960|1360|403|1421|2820|6425|
@@ -159,9 +159,9 @@
 
 Формула: `Задержка = (Расстояние * 1.5) / 200 + 10 мс`, где:
 
-+ 1.5 - коэффициент увеличения пути (оптоволокно не идет по прямой) [[13]](https://books.google.ru/books?id=5LMp7yxfeDAC&source=ttb&redir_esc=y),
-+ 200 - скорость распространения сигнала в оптоволокне (км/мс) [[14]](https://nag.ru/news/18705),
-+ 10 мс - запас на сетевое оборудование и маршрутизацию [[15]](https://www.juniper.net/documentation/us/en/software/junos/cos/topics/concept/hw-cos-trio-scheduler-delay-buffering.html).
++ 1.5 - коэффициент увеличения пути (оптоволокно не идет по прямой) [[14]](https://books.google.ru/books?id=5LMp7yxfeDAC&source=ttb&redir_esc=y),
++ 200 - скорость распространения сигнала в оптоволокне (км/мс) [[15]](https://nag.ru/news/18705),
++ 10 мс - запас на сетевое оборудование и маршрутизацию [[16]](https://www.juniper.net/documentation/us/en/software/junos/cos/topics/concept/hw-cos-trio-scheduler-delay-buffering.html).
 
 |Город|Москва|Санкт-Петербург|Ростов-на-Дону|Пятигорск|Нижний Новгород|Екатеринбург|Новосибирск|Владивосток|
 |----------|----------|----------|----------|----------|----------|----------|----------|----------|
@@ -174,12 +174,31 @@
 |Новосибирск|33,97|33,29|33,12|33,04|28,09|20,49|-|37,86|
 |Владивосток|64,61|57,68|60,98|60,81|55,23|47,99|37,86|-|
 
-Для банковских приложений нормальными уровнями задержки сети считаются [[16]](https://sky.pro/wiki/lifestyle/osnovnye-parametry-testirovaniya-interneta-ping-jitter-latency/):
+Для банковских приложений нормальными уровнями задержки сети считаются [[17]](https://sky.pro/wiki/lifestyle/osnovnye-parametry-testirovaniya-interneta-ping-jitter-latency/):
 + Обычные транзакции и использование приложения: до 200 мс
 + Трейдинг: до 50 мс
 
 Так как мы не учитываем трейдинг как базовый функционал, уровень задержки между ЦФО и ПФО, где расположены ЦОД, и остальными ФО, является допустимым.
 
-Выводы:
+### Выводы
 + Оптимальное местоположение ЦОД: Центральный и Приволжский ФО, т. к. в них проживает бОльшая доля насления страны (почти 50%).
 + Расположение ЦОД в Центральной России позволяет качественно и без серьёзных задержек обрабатывать даже те данные, которые поступают из наиболее удалённых от них регионов страны (Сибирь, Дальний Восток).
+
+### Список использованных источников
+1. [ЦОДы Сбербанка](https://www.tadviser.ru/index.php/Продукт:ЦОДы_Сбербанка)
+2. [Мега-ЦОД Сбербанка-2 в Сколково](https://www.tadviser.ru/index.php/Проект:Мега-ЦОД_Сбербанка-2_в_Сколково)
+3. [Как устроен новый ЦОД Сбербанка в Сколково](https://futurebanking.ru/post/3517)
+4. [Сбербанк построил МегаЦОД за $1,2 млрд](https://www.cnews.ru/news/top/sberbank_postroil_megatsod_za_12_mlrd)
+5. [Мега-ЦОД Сбербанка в Балаково](https://www.tadviser.ru/index.php/Продукт:МегаЦОД_Сбербанка_в_Балаково)
+6. [Современные технологии на страже интересов государства и граждан: Крупнейший в России ЦОД Сбера строится в Балаково](https://probalakovo.ru/2022/09/03/sovremennye-tehnologii-na-strazhe-interesov-gosudarstva-i-grazhdan-krupnejshij-v-rossii-czod-sbera-stroitsya-v-balakovo/)
+7. [В Саратовской области завершат создание крупнейшего в Европе дата-центра к 2030 году](https://tass.ru/ekonomika/19922233)
+8. [Девелопер NK Group построит кампус ЦОДов в Домодедово](https://www.rbc.ru/technology_and_media/26/02/2026/699ef2ce9a79477b30d9f7e3?from=short_news)
+9. [«Сбер» запустил в Караганде резервный ЦОД](https://habr.com/ru/news/671834/)
+10. [«Сбер» объявил о создании собственного IT-подразделения в Индии](https://habr.com/ru/news/749326/)
+11. [Федеральные округа Российской Федерации](https://ru.wikipedia.org/wiki/Федеральные_округа_Российской_Федерации)
+12. [Расстояние между городами по прямой](https://banderlogika.ru/)
+13. [Яндекс Карты](https://yandex.ru/maps)
+14. [Optical Network Design and Implementation](https://books.google.ru/books?id=5LMp7yxfeDAC&source=ttb&redir_esc=y)
+15. [Занимательный оптокабель](https://nag.ru/news/18705)
+16. [Scheduler Delay Buffering on MIC and MPC Interfaces](https://www.juniper.net/documentation/us/en/software/junos/cos/topics/concept/hw-cos-trio-scheduler-delay-buffering.html)
+17. [Ping, Jitter, Latency: почему скорости интернета недостаточно](https://sky.pro/wiki/lifestyle/osnovnye-parametry-testirovaniya-interneta-ping-jitter-latency/)
