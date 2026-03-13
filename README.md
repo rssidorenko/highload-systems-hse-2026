@@ -284,3 +284,7 @@ Anycast будет применяться для балансировки тра
 
 ### Выводы
 Одного современного балансировщика хватит, чтобы покрыть пиковую нагрузку по всем метрикам. Для обеспечения отказоустойчивости (N+1) и возможности обслуживания мы закладываем 2 балансировщика L7 на каждый крупный ЦОД. Балансировщики L4 (например, на базе Linux Virtual Server или аппаратные) также дублируются в количестве 2 штук на ЦОД. Помимо этого, для большей гарантии работоспособности планируется использование сервиса Kubernetes.
+
+### Список использованных источников
+1. [Testing the Performance of NGINX Ingress Controller for Kubernetes](https://blog.nginx.org/blog/testing-performance-nginx-ingress-controller-kubernetes)
+2. [Testing the Performance of NGINX and NGINX Plus Web Servers](https://blog.nginx.org/blog/testing-the-performance-of-nginx-and-nginx-plus-web-servers)
