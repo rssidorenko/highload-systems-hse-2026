@@ -1,4 +1,4 @@
-<img width="640" height="346" alt="image" src="https://github.com/user-attachments/assets/e19e28d1-1592-4155-8a74-e2c46f46c6fd" /># Проект высоконагруженного сервиса Сбербанк Онлайн
+# Проект высоконагруженного сервиса Сбербанк Онлайн
 ## 1. Тема и целевая аудитория
 ### Описание и аналоги
 #### Описание [[1]](https://www.sberbank.ru/ru/person/dist_services)
