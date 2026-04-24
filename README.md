@@ -414,3 +414,48 @@ Anycast-балансировка – это метод балансировки,
 
 ## 10. Схема проекта
 <img width="3663" height="1579" alt="Блок-схема Сбербанк Онлайн" src="https://github.com/user-attachments/assets/45fb46f8-f9e9-4c8f-b4bf-bb328daed6eb" />
+
+## 11. Расчёт нагрузки
+### Физические серверы ЦОД
+Ниже представлен расчёт ресурсов и список серверов для одного ЦОД (на примере «Сколково») с учётом приведённых нагрузок, выбранного технологического стека и требований отказоустойчивости. Второй ЦОД (Балаково) имеет идентичную конфигурацию и в нормальном режиме обслуживает оставшуюся часть трафика, а в аварийном способен полностью принять нагрузку первого.
+
+---
+
+### 11. Список серверов
+
+#### 11.1. Физические серверы ЦОД
+Все серверы работают под управлением SberLinux OS, размещаются в стойках с резервированием питания (Tier III).
+
+| Роль | Кол-во | Конфигурация одного сервера | Размещаемые сервисы |
+|------|--------|-----------------------------|----------------------|
+| L4-балансировщик | 2 (N+1) | 8 vCPU, 16 GB RAM, 2×10 GbE NIC | HAProxy / LVS, keepalived для виртуального IP |
+| Kubernetes Master | 3 | 8 vCPU, 16 GB RAM, 2×1 GbE, SSD 256 GB (система), SSD 512 GB (etcd) | Control Plane, etcd |
+| Kubernetes Worker | 4 | 16 vCPU (32 потока), 64 GB RAM, 2×10 GbE, SSD 512 GB (ОС), NVMe 1 TB (локальное хранилище для подов) | Все микросервисы (auth, payments, data, products), NGINX Ingress Controller, системные поды (мониторинг, трассировка) |
+| PostgreSQL (ACID-кластер) | 4 (шардирование + реплика) | 16 vCPU, 256 GB RAM, 2×10 GbE, NVMe RAID 4 TB, карта FPGA для ускорения шифрования | PostgreSQL 15, Platform V Pangolin. Шарды по user_id с потоковой репликацией |
+| Redis Cluster | 6 (3 шарда × 2 реплики) | 8 vCPU, 64 GB RAM, 2×10 GbE, NVMe 1 TB (для AOF/RDB) | Redis 7, Sentinel. Хранение UserCache и SessionCache |
+| ClickHouse | 3 (шардирование + реплика) | 16 vCPU, 128 GB RAM, 2×10 GbE, NVMe RAID 8 TB (данные) | ClickHouse 23.x. Аналитика OperationHistory, Notifications |
+| Apache Kafka | 3 (брокеры) | 8 vCPU, 32 GB RAM, 2×10 GbE, NVMe 2 TB (журналы) | Kafka 3.x. Потоковая обработка событий |
+| S3-хранилище (Ceph) | 3 (мониторы + OSD) | 8 vCPU, 32 GB RAM, 2×10 GbE, системный SSD 256 GB, HDD 8×8 TB (OSD) | Ceph. Хранение квитанций, выписок, временных файлов |
+| Серверы инфраструктуры и мониторинга | 2 | 8 vCPU, 32 GB RAM, 2×1 GbE, SSD 512 GB (ОС), HDD 2 TB (логи) | Prometheus, VictoriaMetrics, Grafana, OpenTelemetry Collector, Jaeger, ELK (Elasticsearch), Vault, ArgoCD, GitLab Runner |
+
+Итого на один ЦОД: **29 серверов** (без учёта сетевого оборудования). Для двух ЦОД – **58 серверов**, что укладывается в общий парк Сбера (~63 тыс. серверов) и оставляет резерв для других систем.
+
+### 11.2. Распределение ресурсов для контейнеров в Kubernetes
+Внутри Kubernetes-кластера сервисы развёрнуты в виде Deployments/StatefulSets. Минимальное количество реплик рассчитано на пиковую нагрузку одного ЦОД (~13 000 RPS) с запасом и резервированием N+1.
+
+| Сервис (Deployment) | Реплики | CPU requests | CPU limits | Memory requests | Memory limits | Комментарий |
+|---------------------|---------|--------------|------------|-----------------|---------------|-------------|
+| nginx-ingress-controller | 2 | 4 vCPU | 8 vCPU | 4 GB | 8 GB | Терминирует SSL (TLS), обрабатывает ~ 6 500 RPS на реплику. Использует hostNetwork для производительности. |
+| auth-service | 2 | 1 vCPU | 2 vCPU | 2 GB | 4 GB | Пиковая нагрузка ~ 1 531 RPS. SessionCache проверяется в Redis. |
+| payments-service | 3 | 2 vCPU | 4 vCPU | 4 GB | 8 GB | Сложная бизнес-логика, саги, запись в БД. ~ 1 720 RPS пик. |
+| data-service | 4 | 4 vCPU | 8 vCPU | 8 GB | 16 GB | Наиболее нагруженный домен (~ 9 668 RPS). Активно работает с Redis и ClickHouse. |
+| products-service | 1 | 0.5 vCPU | 1 vCPU | 1 GB | 2 GB | Очень низкая нагрузка (~ 14 RPS). |
+| kafka-offset-reader | 2 | 1 vCPU | 2 vCPU | 2 GB | 4 GB | Чтение событий из Kafka для наполнения кэша и аналитики. |
+| cron‑job‑cleaner | – | – | – | – | – | Kubernetes CronJob, запускается раз в сутки для очистки TempFiles. |
+| prometheus | 1 (StatefulSet) | 2 vCPU | 4 vCPU | 8 GB | 16 GB | Сбор метрик. |
+| jaeger-collector | 2 | 1 vCPU | 2 vCPU | 2 GB | 4 GB | Приём трейсов. |
+| vault-agent | 1 на ноду (DaemonSet) | 100 mCPU | 200 mCPU | 128 MB | 256 MB | Инжекция секретов. |
+
+Все поды равномерно распределяются по worker-узлам с помощью `podAntiAffinity`, чтобы при выходе из строя одного узла сервис оставался доступен на других.
+
+Таким образом, для работы микросервисного слоя в одном ЦОД достаточно **4 worker-узлов** (суммарные потребности CPU < 48 ядер с учётом oversubscription). При росте нагрузки кластер легко масштабируется добавлением новых worker-узлов и увеличением количества реплик через HPA.
