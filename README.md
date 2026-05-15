@@ -362,6 +362,28 @@
 - **Сессионный кэш** шардируется по `session_id`, что позволяет равномерно распределять нагрузку между узлами Redis.
 - **Географическая репликация**: данные критических сущностей реплицируются между ЦОД с контролем согласованности. Кэши и временные файлы могут иметь локальную копию в каждом ЦОД для минимизации задержек.
 
+## 6. Физическая схема БД
+<img width="1420" height="1038" alt="image" src="https://github.com/user-attachments/assets/5c9f09c5-6884-48e4-8651-b6f1dcc3618f" />
+
+### Описание схемы
+| Таблица              | СУБД                        | Кол-во строк     | Размер строки | Первичный ключ        | Внешние ключи                | Особенности                                                                 |
+|----------------------|-----------------------------|------------------|---------------|-----------------------|------------------------------|------------------------------------------------------------------------------|
+| users                | PostgreSQL (Pangolin)       | 110 млн          | ~1 КБ         | user_id               | –                            | Активные профили клиентов, денормализованы контактные данные                 |
+| sessions             | Platform V SessionsData     | 42 млн (пик)     | ~0,5 КБ       | session_id            | user_id                      | Хранится в отдельной системе (собственная разработка Сбера)                 |
+| accounts             | PostgreSQL                  | 200 млн          | ~0,5 КБ       | account_id            | user_id                      | Банковские счета (руб, валюта)                                              |
+| cards                | PostgreSQL                  | 250 млн          | ~0,5 КБ       | card_id               | account_id                   | Пластиковые/виртуальные карты                                               |
+| transactions         | PostgreSQL + ClickHouse     | 1 трлн           | ~0,3 КБ       | tx_id                 | account_id, user_id (денорм) | Горячие 3 мес в PG, старые в ClickHouse                                    |
+| payments             | PostgreSQL + ClickHouse     | 500 млрд         | ~0,5 КБ       | payment_id            | user_id                      | Платежи СБП, QR, биометрия                                                   |
+| loans                | PostgreSQL                  | 50 млн           | ~2 КБ         | loan_id               | user_id                      | Кредитные договоры, график платежей JSON                                    |
+| deposits             | PostgreSQL                  | 30 млн           | ~1,5 КБ       | deposit_id            | user_id                      | Вклады                                                                      |
+| statements           | PostgreSQL мета + S3        | 500 млн          | ~0,2 КБ       | stmt_id               | user_id                      | Ссылки на PDF в S3                                                          |
+| support_chats        | PostgreSQL                  | 10 млн           | ~0,3 КБ       | chat_id               | user_id, operator_id         | Сессии чата поддержки                                                        |
+| chat_messages        | PostgreSQL                  | 1 млрд           | ~1 КБ         | message_id            | chat_id                      | Сообщения, текст до 4 КБ                                                    |
+| operation_history    | ClickHouse                  | 5 трлн           | ~0,2 КБ       | history_id            | user_id (денорм)             | Лог действий, сжатие 10:1                                                   |
+| notifications        | ClickHouse                  | 2 трлн           | ~0,1 КБ       | notif_id              | user_id                      | Push/SMS/email уведомления                                                  |
+| user_cache           | Redis Cluster               | 110 млн          | ~2 КБ         | user:{user_id}        | –                            | JSON профиля + счета + карты, TTL 15 мин                                    |
+| session_cache        | Redis Cluster               | 42 млн           | ~1 КБ         | session:{session_id}  | –                            | OTP, черновики платежей, TTL сессии                                         |
+| temp_files           | PostgreSQL мета + S3        | 100 млн (активных) | ~0,3 КБ       | file_id               | user_id, payment_id          | Данные временных файлов                                                 |
 
 ## 7. Алгоритмы
 |Алгоритм|Область применения|Подробное описание|
